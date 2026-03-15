@@ -2,14 +2,14 @@ import React, { useState, useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import 'remixicon/fonts/remixicon.css';
-import carImage from "../assets/carImage.png";
-import motoImage from "../assets/motoImage.png";
-import autoImage from "../assets/autoImage.jpg";
+import VehiclPanel from '../components/VehiclPanel';
 
 // Make sure these paths match your project structure
 import uberIcon from "../assets/uber-logo.png";
 import ubermap from "../assets/uber-map.jpg";
 import LocationSearchPanel from '../components/LocationSearchPanel';
+import ConfirmedRide from '../components/ConfirmedRide';
+import LookingForDriver from '../components/LookingForDriver';
 
 const Home = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null); // or default to 'uberGo'
@@ -17,10 +17,14 @@ const Home = () => {
   const [destination, setDestination] = useState("");
   const [panelOpen, setPanelOpen] = useState(false);
   const [vehiclePanelOpen, setvehiclePanelOpen] = useState(false);
-  
+  const [confirmedRidePanel, setConfirmedRidePanel] = useState(false);
+  const [vehicleFound, setVehicleFound] = useState(false);
+
   const panelRef = useRef(null);
   const panelCloseRef = useRef(null);
   const vehiclePanelOpenRef = useRef(null);
+  const confirmedRidePanelRef = useRef(null);
+  const vehicleFoundRef = useRef(null);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -67,6 +71,31 @@ const Home = () => {
       });
     }
   }, [vehiclePanelOpen]);
+
+  useGSAP(() => {
+    if (confirmedRidePanel) {
+      gsap.to(confirmedRidePanelRef.current, {
+        transform: "translateY(0%)",
+      });
+    } else {
+      gsap.to(confirmedRidePanelRef.current, {
+        transform: "translateY(100%)",
+      });
+    }
+  }, [confirmedRidePanel]);
+
+  useGSAP(() => {
+    if (vehicleFound) {
+      gsap.to(vehicleFoundRef.current, {
+        transform: "translateY(0%)",
+      });
+    } else {
+      gsap.to(vehicleFoundRef.current, {
+        transform: "translateY(100%)",
+      });
+    }
+  }, [vehicleFound]);
+
 
   return (
     <div className="h-screen w-full relative overflow-hidden bg-gray-100">
@@ -143,69 +172,29 @@ const Home = () => {
       </div>
 
      {/* Vehicle Options */}
-      <div ref={vehiclePanelOpenRef} className='fixed w-full z-30 bottom-0 bg-white p-3 py-14 px-4 rounded-t-3xl shadow-[0_-10px_20px_rgba(0,0,0,0.05)] translate-y-full'>
+      <div ref={vehiclePanelOpenRef}       className='fixed w-full z-30 bottom-0 bg-white p-3 py-14 px-4 rounded-t-3xl shadow-[0_-10px_20px_rgba(0,0,0,0.05)] translate-y-full'>
         
-        <h5 className='p-1 text-center w-[93%] absolute top-0'><i
-        onClick={()=>{
-        setvehiclePanelOpen(false)
-      }}
-        className="ri-arrow-down-wide-fill text-3xl text-gray-200"></i></h5>
+        <VehiclPanel setSelectedVehicle={setSelectedVehicle} setvehiclePanelOpen={setvehiclePanelOpen}
+        setConfirmedRidePanel={setConfirmedRidePanel} />
 
-        <h3 className='text-2xl font-semibold mb-5'>Choose a vehicle</h3>
+      </div>
+
+      {/* confirmed ride component */}
+      <div ref={confirmedRidePanelRef} className='fixed w-full z-30 bottom-0 bg-white p-3 py-14 px-4 rounded-t-3xl shadow-[0_-10px_20px_rgba(0,0,0,0.05)] translate-y-full'>
         
-        {/* Vehicle Card 1 */}
-        <div 
-          onClick={() => setSelectedVehicle('uberGo')}
-          className={`flex border-2 rounded-xl p-3 w-full bg-white items-center justify-between mb-3 cursor-pointer transition-all ${
-            selectedVehicle === 'uberGo' ? 'border-black' : 'border-gray-400 hover:border-gray-500'
-          }`}
-        >
-          <img src={carImage} alt="Car" className='h-14 w-1/4 object-contain'/>
-          <div className='w-1/2 flex flex-col pl-2'>
-            <h4 className='font-medium text-base flex items-center gap-2'>
-              UberGo <span className='text-sm flex items-center'><i className="ri-user-3-fill mr-1"></i>4</span>
-            </h4>
-            <h5 className='font-medium text-sm text-gray-800'>2 mins away</h5>
-            <p className='font-normal text-xs text-gray-500 line-clamp-1'>Affordable, compact rides</p>
-          </div>
-          <h2 className='text-xl font-semibold w-1/4 text-right'>₹150</h2>
-        </div>
+        <ConfirmedRide setSelectedVehicle={setSelectedVehicle} setvehiclePanelOpen={setvehiclePanelOpen} 
+        setConfirmedRidePanel={setConfirmedRidePanel}
+        setVehicleFound={setVehicleFound}
+        />
 
-        {/* Vehicle Card 2 */}
-        <div 
-          onClick={() => setSelectedVehicle('moto')}
-          className={`flex border-2 rounded-xl p-3 w-full bg-white items-center justify-between mb-3 cursor-pointer transition-all ${
-            selectedVehicle === 'moto' ? 'border-black' : 'border-gray-400 hover:border-gray-500'
-          }`}
-        >
-          <img src={motoImage} alt="Moto" className='h-14 w-1/4 object-contain'/>
-          <div className='w-1/2 flex flex-col pl-2'>
-            <h4 className='font-medium text-base flex items-center gap-2'>
-              MotorCycle <span className='text-sm flex items-center'><i className="ri-user-3-fill mr-1"></i>1</span>
-            </h4>
-            <h5 className='font-medium text-sm text-gray-800'>3 mins away</h5>
-            <p className='font-normal text-xs text-gray-500 line-clamp-1'>Affordable motorcycle rides</p>
-          </div>
-          <h2 className='text-xl font-semibold w-1/4 text-right'>₹65</h2>
-        </div>
+      </div>
 
-        {/* Vehicle Card 3 */}
-        <div 
-          onClick={() => setSelectedVehicle('auto')}
-          className={`flex border-2 rounded-xl p-3 w-full bg-white items-center justify-between mb-3 cursor-pointer transition-all ${
-            selectedVehicle === 'auto' ? 'border-black' : 'border-gray-400 hover:border-gray-500'
-          }`}
-        >
-          <img src={autoImage} alt="Auto" className='h-14 w-1/4 object-contain'/>
-          <div className='w-1/2 flex flex-col pl-2'>
-            <h4 className='font-medium text-base flex items-center gap-2'>
-              UberAuto <span className='text-sm flex items-center'><i className="ri-user-3-fill mr-1"></i>3</span>
-            </h4>
-            <h5 className='font-medium text-sm text-gray-800'>1 min away</h5>
-            <p className='font-normal text-xs text-gray-500 line-clamp-1'>No haggling auto rides</p>
-          </div>
-          <h2 className='text-xl font-semibold w-1/4 text-right'>₹118</h2>
-        </div>
+       <div ref={vehicleFoundRef} className='fixed w-full z-30 bottom-0 bg-white p-3 py-14 px-4 rounded-t-3xl shadow-[0_-10px_20px_rgba(0,0,0,0.05)] translate-y-full'>
+        
+        <LookingForDriver setSelectedVehicle={setSelectedVehicle} setvehiclePanelOpen={setvehiclePanelOpen} 
+        setConfirmedRidePanel={setConfirmedRidePanel}
+
+        />
 
       </div>
     </div>
